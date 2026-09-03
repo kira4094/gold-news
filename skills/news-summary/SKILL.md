@@ -8,7 +8,7 @@ description: >
   触发词包括但不限于：新闻汇总、新闻整理、今日新闻、今天新闻、每日新闻、
   新闻日报、早报、晚报、资讯汇总、最近新闻、最新资讯、what's happening today、
   daily news、news roundup、整理新闻、帮我看看今天的新闻。
-version: 1.2.0
+version: "0.1.0"
 ---
 
 # 新闻汇总技能
