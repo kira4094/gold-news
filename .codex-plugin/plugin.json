@@ -1,0 +1,40 @@
+{
+  "name": "gold-news",
+  "version": "0.1.0+20260903",
+  "description": "黄金 + 新闻一体化：gold-price (黄金分析与金价获取) + news-summary (新闻汇总与分类)。新闻汇总必伴随黄金日报二合一，含金价双源交叉、Fed传声筒、褐皮书追踪、六维度清单、固化输出模板。",
+  "author": {
+    "name": "kira4094",
+    "url": "https://github.com/kira4094"
+  },
+  "homepage": "https://github.com/kira4094/gold-news",
+  "repository": "https://github.com/kira4094/gold-news",
+  "keywords": [
+    "gold",
+    "gold-price",
+    "gold-analysis",
+    "news",
+    "news-summary",
+    "fed",
+    "beige-book",
+    "xau"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Gold & News",
+    "shortDescription": "黄金分析 + 新闻汇总 + 金价获取",
+    "longDescription": "整合黄金价格获取（双源交叉）、宏观数据追踪（CPI/PCE/NFP/Fed/褐皮书）、持仓管理、Fed传声筒信号链与新闻汇总。新闻汇总自动伴随黄金日报二合一输出。",
+    "developerName": "kira4094",
+    "category": "Finance",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "websiteURL": "https://github.com/kira4094/gold-news",
+    "defaultPrompt": [
+      "新闻汇总",
+      "黄金日报 / 金价多少",
+      "追踪 Fed / 褐皮书 / 宏观数据"
+    ],
+    "brandColor": "#D4AF37"
+  }
+}

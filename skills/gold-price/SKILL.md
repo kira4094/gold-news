@@ -1,0 +1,313 @@
+---
+name: gold-price
+description: >
+  黄金分析与金价获取 skill。整合金价获取（GoldPrice.Today / 东方财富 / PAXG 暗金）、
+  宏观数据追踪（CPI/PCE/NFP/FRED 初请失业金）、持仓管理、Fed 传声筒信号链分析、
+  美国媒体监测。支持日常金价查询、周末暗金参考、黄金日报生成。
+  中：黄金价格 | 金价 | 黄金分析 | 黄金日报 | XAU | PAXG | 金价多少 | 宏观数据 | 非农 | CPI | Fed | 黄金持仓
+  EN：gold price | gold analysis | gold daily | XAU | PAXG | gold rate | gold price today | macro data | NFP
+version: "1.5"
+---
+
+# Gold-Price Skill — 黄金分析与金价获取
+
+黄金分析的统一技能入口。整合金价获取、持仓分析、宏观研究、媒体监测。
+
+## 文件结构
+
+```
+gold-price/
+├── SKILL.md                              ← 技能入口（本文件）
+├── XAU-Gold-price-acquisition-rules.md   ← 金价获取规则（主规则）
+├── 黄金数据追踪表.md                     ← 美国宏观数据追踪表
+└── user_macro_gold_interest.md           ← 宏观数据与策略演进
+
+> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**——生成时先向用户确认存储位置（见「月度归档与多端同步」）。
+```
+
+### 记忆存储位置（月度记录候选位置）
+
+> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**：生成时**先提问用户存储位置**，以下为候选，按用户选定写入。
+
+| 位置 | 路径 | 用途 |
+|:-----|:-----|:-----|
+| **记忆目录** | `C:\Users\kiray\AppData\Roaming\reasonix\memory\global\gold-price-memary\` | 会话自动加载 |
+| **OneDrive** | `D:\WindowsOS\OneDrive\应用\claude-memory\Rule\gold-price\`（junction 同步） | 跨设备 |
+| **Tolaria** | `D:\Projects\TolariaData\gold\`（type: Gold） | 可视化浏览 |
+| **自定义路径** | 用户指定 | 其他位置 |
+
+**规则：** 每次月度归档生成 4 份月度记录（月更备忘录 ×2 + 会话记录 ×2）时，**先向用户提问存储位置**（默认选项：记忆目录 / OneDrive / Tolaria / 自定义），按用户选定写入；skill 仓库只放 skill 自身文件（SKILL.md/规则/追踪表/user_macro_gold_interest.md），**不接收月度记录**。Tolaria 用 `create_note`（type: Gold，路径 `gold/{文件名}.md`），写完 `refresh_vault`。
+### 关联外部文件（跨 skill 引用）
+- `../news-summary/news-summary-auto-time.md` — 新闻汇总自动时间判断规则
+- `../news-summary/us-media-monitoring.md` — 美国媒体光谱监测规则
+
+### TL;DR — 速查
+
+| 你想做什么 | 从这里开始 |
+|:----------|:-----------|
+| 查金价 | 直接提问 → 自动判断交易时段选择数据源 |
+| **新闻汇总** | 🔴 **必做：新闻汇总 + 黄金日报二合一输出**（见"新闻汇总联动"） |
+| 看黄金日报 | 查完金价后，🔴 CHECKPOINT 选"是"；**且每次新闻汇总也必做** |
+| 遇到报错 | 看 🛟 失败模式表，按触发条件找修复 |
+| 看持仓盈亏 | 查金价后自动计算，回本线 ~$4,715 |
+
+## 🔴 新闻汇总联动（2026-08-25 新增，硬性）
+
+**规则：只要触发新闻汇总（news-summary skill），必须连带生成黄金日报，二合一输出。**
+
+> 🧩 **完整输出骨架见 `output-templates.md`**（本 skill 目录内，gold-price × news-summary 共用）——生成日报/汇总时直接复制对应模板替换占位符，不再临场造句。结构固定如下：
+
+**黄金日报必备项（每项缺一不可）：**
+| 必选项 | 内容 |
+|:------|:-----|
+| ① 当前金价 | XAU/USD + 人民币/克 |
+| ② 持仓快照 | 克重、均价、浮亏、距回本线 $4,715 |
+| ③ 本周关键数据 | 杰克逊霍尔/PCE/CPI/非农/数据日历 |
+| ④ 外网重磅 | 贝森特/特朗普涉债/美债收益率/沃什/达利欧（防漏关键） |
+
+**🔴 数据失效护栏（硬性，每项数据拉不到时怎么办）：**
+| 必选项 | 拉不到数据时 |
+|:------|:------|
+| ① 当前金价 | **必须显式输出「⚠️ 无法获取实时金价」**，禁止用记忆/估算值当确定值交付；如需参考区间须标注「非实时、待核」（对照「此价待核」原则） |
+| ② 持仓快照 | 记忆/规则缺失 → 明说「无持仓快照数据」，不得编造克重/均价 |
+| ③ 本周关键数据 | 日历/搜索拉不到 → 标注「数据日历待核」，不得编造日期或数值 |
+| ④ 外网重磅 | 搜索失效 → 只列「近期记忆主线、待核实」或明说「今日无」，不得虚构来源 |
+
+> 若用户只说"新闻汇总"，黄金日报**仍必须生成**——不要等用户单独说"黄金日报"。
+
+## 能力
+
+- **🏆 金价获取** — GoldPrice.Today API / 东方财富 OHLC / PAXG 暗金
+- **📊 宏观数据追踪** — CPI/PCE/NFP/初请失业金/消费者信心/GDP
+- **🔄 Cleveland Fed Nowcast** — Playwright 自动打开页面 → 展开三个标签（Quarterly / Monthly MoM / YoY）→ 分别点击 Download CSV → 读取后删除CSV → 关闭浏览器
+
+## Cleveland Fed Nowcast 获取方法（Playwright）
+
+Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的完整 CSV 数据。
+
+### 步骤
+
+1. **打开页面**
+   ```
+   playwright_navigate("https://www.clevelandfed.org/indicators-and-data/inflation-nowcasting")
+   ```
+
+2. **展开三个标签（按需）**
+   ```
+   // 找到并点击 accordion 按钮：button "Quarterly" / "Monthly (month-over-month)" / "Monthly (year-over-year)"
+   evaluate: document.querySelectorAll('button').find(b => b.textContent.includes('返回的文本'))
+   ```
+
+3. **点击 Download CSV**
+   ```
+   // 每个展开的标签区域都有一个 Download CSV 按钮
+   // 通过 evaluate 找到所有 Download CSV 按钮，按顺序点击
+   // Playwright 会自动下载到 .playwright-mcp/ 目录
+   ```
+
+4. **读取 CSV 文件**
+   ```
+   read_file(".playwright-mcp/{filename}.csv")
+   ```
+
+5. **清理**
+   ```
+   rm -f .playwright-mcp/{filename}.csv  # 删除CSV
+   playwright_close()                      # 关闭浏览器
+   ```
+
+### 三份 CSV 对应
+| CSV 文件 | 内容 |
+|:---------|:-----|
+| QuarterlyAnnualizedPercentChange-{year}-q{quarter}.csv | Q3 年化预测（如 CPI 0.83%） |
+| Month-Over-MonthPercentChange-{year}-{month}.csv | 月度 MoM 预测（如 +0.04%） |
+| Year-Over-YearPercentChange-{year}-{month}.csv | 同比 YoY 预测（如 3.37%） |
+
+### 数据说明
+- 模型每天东部 10:00 更新
+- 核心CPI/核心PCE 变化很少很慢（只在实际数据发布时变动）
+- 标题 CPI/PCE 随油价每日波动（油价是主要高频变量）
+- 三个维度都要看：月度 MoM（下月发布值）→ Q3 年化（FOMC 参考）→ YoY 同比（媒体引用）
+- **💰 持仓管理** — 工行 40.37g + 招行 30g 持仓跟踪（含最新879.03买入5g）
+- **🧠 分析框架** — 三面绞杀 / Fed三步曲 / War-Gold Paradox
+- **📡 Fed传声筒** — Nick Timiraos 信号链追踪
+- **📰 美国媒体监测** — 覆盖左/中/右光谱
+- **📡 新闻获取矩阵** — 多源交叉（见下"新闻获取矩阵"）
+
+## 新闻获取矩阵（通用，2026-08-09 更新）
+
+**核心原则：多源交叉、频道优先、不依赖单一搜索引擎。** 财经重要，但时政/地缘常反向影响财经（如美伊战争、Fed 人事、伊朗权力变动），必须跨源覆盖。
+
+### 中文新闻源（按覆盖角色分工）
+
+| 源 | URL | 角色 | 说明 |
+|:---|:----|:----|:-----|
+| **网易新闻** | `https://news.163.com/` | 综合+热点 | ✅ 有实时**热点排行**，重大新闻自动置顶，最适合快速扫描 |
+| **观察者网** | `https://www.guancha.cn/internation?s=dhguoji` | 时政深度 | ✅ 国际/时政频道，带"关联阅读"，美伊/Fed 人事类深度稿 |
+| **凤凰网** | `https://news.ifeng.com/` | 综合时政 | ✅ 资讯频道更新快，国际新闻覆盖全 |
+| **环球网** | `https://world.huanqiu.com/` | 国际 | ✅ 国际要闻+财经交叉（常出现"金价涨了"类报道） |
+| **新浪财经** | `https://feed.mix.sina.com.cn/api/roll/get?pageid=153&lid=2516&k=&num=20&page=1` | 财经快讯 | ✅ 保留，覆盖财经面（API 直连最稳） |
+
+### 外文/地缘源（⚠️ 每次新闻汇总必搜，与中文源并列，不做"可选"）
+
+> **规则：每次执行新闻汇总，外网源必须随矩阵一起跑，与中文源同样优先级，不可省略。**
+
+| 源 | URL | 角色 | 说明 |
+|:---|:----|:----|:-----|
+| **BBC** | `https://www.bbc.com/news/world` + `/news/business` | 全球+财经 | 国际主流视角，交叉验证中文源 |
+| **半岛 Al Jazeera** | `https://www.aljazeera.com/where/iran/` | 中东第一手 | 伊朗权力变动最快爆料方（哈梅内伊系消息源头） |
+| **Iran International** | `https://www.iranintl.com/en` | 伊朗内部 | 反对派视角，爆料最灵敏（英/波斯双语） |
+| **路透 Reuters** | `https://www.reuters.com/world/iran/`（常超时，作备选） | 地缘权威 | web_fetch 常 403/超时，抓到就用，抓不到不强求 |
+
+### 搜索方法论（踩坑记录）
+
+**❌ 不可用（实测）：**
+- 新浪搜索 `search.sina.com.cn` — JS 空壳（443字节）
+- 百度搜索 — 反爬跳转
+- Bing 中文搜索 — 中文分词污染（"穆杰塔巴"被拆成无关词，搜不到精确新闻）
+- 腾讯新闻 `news.qq.com` — JS 空壳
+
+**✅ 正确姿势：**
+1. **抓频道页而非搜索引擎**：国际/财经/热点排行页直接列出最新头条
+2. **热点排行优先**：网易热点排行 = 实时热度，重大新闻必现
+3. **多源交叉验证**：同一新闻 ≥2 源确认；单方爆料（如"以色列媒体称"）必须标注，不当事实
+4. **跟踪关联阅读**：列表页的"相关推荐/关联阅读"链接直接跟进全文
+5. **特定主题**：直接抓对应网站频道页 + 站内搜索，比通用搜索命中率高
+
+### 判断口径（新闻汇总时）
+- 🔴 核心事件：影响金价/宏观的直接驱动（美伊、Fed、关税、数据）
+- 🌍 国际新闻：地缘、各国政经
+- 🇨🇳 国内新闻：政策、产业
+- 📊 数据/机构：宏观数据发布、机构预测
+- ⚠️ 未证实消息：标注信源（"以媒称""传"），不与其他实锤新闻混排
+
+### 持续性观察维度（每次汇总顺带检查，非单一新闻补丁）
+
+| 维度 | 观察点 | 信号含义 |
+|:-----|:-------|:---------|
+| **伊朗权力结构** | 穆杰塔巴是否公开露面 / 官方"罕见视频"真伪 / 佩泽希齐扬/外长口径 | 露面=辟谣（利空地缘溢价）；持续隐身+官方口径矛盾=病危可信度↑（利多避险） |
+| **Fed 人事** | 特朗普解雇理事/换劳工统计局长进展、沃什表态 | Fed 独立性受损=美元信用↓（利多黄金） |
+| **霍尔木兹协议** | 官宣？伊朗强硬派加码？油轮袭击？ | 协议成=油价↓利多降息；黄=油价↑利空 |
+| **传声筒 Timiraos** | 新文章方向（鸽/鹰/中性） | Fed 放风信号 |
+| **AI/芯片** | 巨头资本开支、股价波动、涨价 | AI 虹吸资金 vs 黄金，AI 退潮=黄金受益 |
+
+## 执行流程
+
+### A0: 意图匹配
+
+```
+用户问题 → 判断类型：
+├─ 金价查询（"金价多少""黄金价格""XAU"） → 走 A1
+├─ 黄金日报 / 新闻汇总（"日报""早报""黄金分析"） → 走 A1
+├─ 宏观数据（"非农""CPI""PCE"） → 走 A1
+├─ 持仓查询（"持仓""盈亏""回本"） → 走 A2，计算后输出
+├─ Fed 传声筒 / Timiraos → 走 A2，搜索最新信号
+└─ 周末/非交易时段查价 → 走 A1，自动切换 PAXG 暗金
+```
+
+### A1: 数据获取
+
+0. **核实日期/星期/交易时段（必做）：** 用 `Get-Date`（或系统时钟）取当天日期与星期，据此刻断是否交易日/交易时段。**不单凭用户说法判周末**——用户说"今天周六"但系统是工作日时，以系统时间为准并提醒用户（防工作日被当周末走暗金口径）。
+1. **判断时段：** 按步骤 0 核实的时段——交易时段 → GoldPrice.Today API；周末 → PAXG 暗金
+2. **获取价格：** 按 XAU-Gold-price-acquisition-rules.md 方法执行
+3. **交叉验证：** 两套来源核对，偏差 > 2% 时标注
+4. **输出：** 多单位报价（盎司/克/千克）+ 日内区间
+
+### A2: 扩展分析
+
+1. **宏观日历** → Cleveland Fed Nowcast
+2. **持仓更新** → 黄金数据追踪表.md
+3. **Timiraos 信号** → 搜索最新文章，更新信号链
+
+### A3: 验证与输出
+
+**🔴 CHECKPOINT：是否展开为完整日报？**
+- 是 → 走 A2 扩展分析后输出标准日报
+- 否 → 仅返回金价数据，结束
+
+**🛑 STOP：确认输出格式**
+- 📄 简短行情（仅金价 + 涨跌）
+- 📋 标准黄金日报模板（含宏观 + 机构预测 + 持仓）
+- 🔍 自定义分析（用户指定方向）
+
+## ⚡ 数据发布即时更新（每次数据后必做）
+
+**触发：** 每次美国宏观数据发布后（CPI / PPI / PCE / 非农 / ADP / 初请 / ISM / GDP / 消费者信心 / 克利夫兰 Nowcast），**当天立即更新**《黄金数据追踪表》，不等月末。
+
+**步骤：**
+1. **更新追踪表** — 在 `黄金数据追踪表.md` 对应指标行填入实际值/预期/前值/结果判定，并记录市场反应（金价/美元/加息概率变动）
+2. **同步 3 处**（追踪表属 skill 文件，与月度记录分开处理）：
+   - skill 仓库：写文件 + `git add/commit/push`（commit 带 `fix:` 或 `feat:` 标签）
+   - 记忆目录：`cp` 复制
+   - Tolaria：`update_note`（带 `expectedMtime`）更新 `gold/黄金数据追踪表.md`
+3. **汇报** — 给用户展示数据速记（实际 vs 预期 vs 前值 + 市场反应 + 对黄金含义）
+
+**示例（8/7 非农）：** 发布 -2.3万 → 当天更新追踪表 7月行 + 非农明细 + 市场反应 → git push → 记忆目录 → Tolaria
+
+## 📁 月度归档与多端同步（月末必做）
+
+**触发：** 每月最后一天 / 用户说"写月度记录" / 下月 1 号初始化新月份档案
+
+**步骤：**
+1. **写档案** — 生成/更新 5 个文件：
+   - `{月份}黄金分析与持仓备忘录.md`（持仓+日历+框架）
+   - `{月份}黄金分析会话记录.md`（会话要点+数据速览）
+   - `黄金数据追踪表.md`（宏观数据全年累计，已含当月所有即时更新）
+   > 月度记录（备忘录 ×2 + 会话记录 ×2）与追踪表分开处理：追踪表属 skill 文件留 skill 仓库；月度记录**不写回 skill 仓库**。
+
+2. **提问存储位置** — 生成 4 份月度记录前，先问用户「本次记录存哪里？」（默认：记忆目录 / OneDrive / Tolaria / 自定义路径），按用户选定写入（不写回 skill 仓库）：
+   | 位置 | 方式 |
+   |:-----|:-----|
+   | 记忆目录 `...\reasonix\memory\global\gold-price-memary\` | `cp` 复制（与 OneDrive junction 自动同步） |
+   | OneDrive `D:\WindowsOS\OneDrive\应用\claude-memory\Rule\gold-price\` | junction 自动同步（无需手动） |
+   | **Tolaria** `D:\Projects\TolariaData\gold\` | `create_note`（type: Gold，路径 `gold/{文件名}.md`）+ `refresh_vault` |
+   | 自定义路径 | 按用户指定路径写入 |
+
+3. **版本号** — 更新 SKILL.md frontmatter 版本（feat 类改动 minor+1），仓库级版本跑 `update-version.cjs`
+
+4. **Tolaria 注意事项**：
+   - type 用 `Gold`（已注册），frontmatter 写 `type: Gold`
+   - 更新已有笔记用 `update_note`（带 `expectedMtime` 防覆盖）；新建用 `create_note`
+   - 完成后 `refresh_vault` 让 Tolaria 索引刷新
+
+## 🛟 失败模式与 Fallback
+
+| 触发条件 | 一线修复 | 仍失败兜底 |
+|:---------|:---------|:-----------|
+| GoldPrice.Today API 超时 / 空返回 | 等 3 秒重试 1 次 | 切 gold-api.com（方法4）或 Kitco（方法3） |
+| `browse open` 报端口冲突 | 先 `browse stop` 再重开 | 加 `--session custom` 用独立 session |
+| browse 找不到 Chromium | 确认 `CHROME_PATH` 环境变量 | 浏览器不可用时降级到方法5（搜索兜底） |
+| 周末 PAXG 暗金也拉不到 | 切备用：GoldPrice.Today → gold-api.com | 标注"无法获取暗金价格"，告知用户 |
+| 两套来源偏差 > 2% | 用东方财富（方法2）做第三方验证 | 保留偏差标注，两套都输出供用户判断 |
+| FRED API 初请失业金拉不到 | 5 分钟后重试 | 降级到 WebSearch 搜索快照 |
+| Cleveland Fed Nowcast JS 渲染获取不到 | 切换到 Playwright 打开页面 + Download CSV | Playwright 不可用时，可以尝试 `web_fetch` 直接获取页面文字内容（可能截断但能看重要数字） |
+| Playwright Chromium 路径错误 | 确认 `CHROME_PATH` 环境变量指向正确的 chrome.exe 路径 | 检查 `which google-chrome / chromium / chrome` |
+| 用户问"今天黄金分析"但不看日报 | 用 A0 先判断意图：是查价还是日报 | 按用户意图只输出金价或日报 |
+| 国内裸金换算汇率过时 | 使用实时汇率（GoldPrice.Today 直接返回 CNY.gram） | 手动换算时标注"汇率约 X.XX" |
+
+## 反例与黑名单
+
+| # | ❌ 不要这样做 | 为什么 | ✅ 应该这样做 |
+|:-:|:-------------|:-------|:-------------|
+| 1 | **日常看价直接开东方财富 browse** | browse CLI 启动开销大，纯看现价大材小用 | 日常看价 → GoldPrice.Today API（方法1），秒级返回 |
+| 2 | **交易时段依赖 PAXG 暗金** | PAXG 是周末/非交易时段用的，交易时段有更准的官方来源 | 交易时段 → 方法1/3/4；周末 → 方法2B |
+| 3 | **只看一个数据源就交付** | 单一来源可能有延迟或异常，无法交叉验证 | 至少两套来源核对，偏差 > 2% 时标注 |
+| 4 | **日报里堆砌全部能力** | 用户要金价却给了完整分析框架，信息过载 | 按 🔴 CHECKPOINT 让用户选：金价 only / 标准日报 / 自定义 |
+| 5 | **忽略汇率直接用国际金价报人民币** | XAU/USD × 汇率 ÷ 31.1035 才是国内裸金 | 优先用 GoldPrice.Today 直接返回的 CNY.gram；手动换算时标注汇率 |
+| 6 | **FOMC 前不查 Timiraos** | 传声筒放风是 Fed 转向最早信号，错过了等于盲飞 | FOMC 前必须搜 Timiraos 最新文章，更新信号链 |
+| 7 | **browse 不 stop 就开新 session** | 旧 session 不关会导致端口冲突、新页面打不开 | 每次 `browse open` 前先 `browse stop` |
+| 8 | **日报用过期汇率换算** | 手动换算用旧汇率，和用户平台报价偏差大 | 优先用 GoldPrice.Today 直接返回的 CNY.gram |
+| 9 | **用户只问金价却输出全部持仓明细** | 用户没问持仓，给了算隐私泄露 | 按 🔴 CHECKPOINT 用户确认后才展开 |
+
+## 系统化学习路径
+
+1. **入门** — 日常看金价 + 了解 XAU/USD 基本知识
+2. **基础** — 宏观数据解读（CPI/PCE/NFP 对金价的影响）
+3. **进阶** — Fed 传声筒信号链 + 分析框架（三面绞杀）
+4. **高级** — 多数据源交叉验证 + 机构预测精度对比
+5. **精通** — 三元共振 + AI 资本支出 + 持仓策略管理
+
+## 使用方式
+- 新闻汇总黄金日报 → 标准模板
+- 数据追踪 → 黄金数据追踪表.md
+- 外媒搜索 → 覆盖左右光谱

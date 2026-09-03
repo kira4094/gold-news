@@ -1,0 +1,41 @@
+{
+  "name": "gold-news",
+  "version": "0.1.0",
+  "displayName": "黄金与新闻",
+  "displayNameEn": "Gold & News",
+  "description": "黄金分析 + 新闻汇总一体化助手：金价获取（双源交叉）、宏观数据追踪（CPI/PCE/非农/Fed/褐皮书）、持仓管理、Fed传声筒信号链。新闻汇总自动伴随黄金日报二合一输出。",
+  "author": {
+    "name": "kira4094"
+  },
+  "license": "MIT",
+  "keywords": [
+    "黄金",
+    "金价",
+    "新闻汇总",
+    "美联储",
+    "褐皮书",
+    "宏观数据"
+  ],
+  "instructions": "INSTRUCTIONS.md",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "黄金与新闻",
+    "shortDescription": "黄金价格分析 + 美联储宏观追踪 + 新闻汇总一体化助手",
+    "longDescription": "整合金价获取（gold-api + goldprice.today 双源交叉）、美国宏观数据追踪（CPI/PCE/NFP/Fed/褐皮书）、持仓管理、Fed传声筒信号链分析与新闻汇总。新闻汇总时自动伴随生成黄金日报。",
+    "developerName": "kira4094",
+    "category": "财经分析",
+    "capabilities": [
+      "Interactive",
+      "Read"
+    ],
+    "defaultPrompt": [
+      "新闻汇总",
+      "黄金日报 / 金价多少 / XAU",
+      "追踪美联储褐皮书 / 宏观数据"
+    ],
+    "logo": "./assets/icon.svg",
+    "composerIcon": "./assets/icon.svg",
+    "brandColor": "#D4AF37",
+    "screenshots": []
+  }
+}
