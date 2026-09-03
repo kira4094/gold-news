@@ -6,7 +6,7 @@ description: >
   美国媒体监测。支持日常金价查询、周末暗金参考、黄金日报生成。
   中：黄金价格 | 金价 | 黄金分析 | 黄金日报 | XAU | PAXG | 金价多少 | 宏观数据 | 非农 | CPI | Fed | 黄金持仓
   EN：gold price | gold analysis | gold daily | XAU | PAXG | gold rate | gold price today | macro data | NFP
-version: "0.1.1"
+version: "0.1.3"
 ---
 
 # Gold-Price Skill — 黄金分析与金价获取
