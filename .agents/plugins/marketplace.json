@@ -1,0 +1,20 @@
+{
+  "name": "gold-news",
+  "interface": {
+    "displayName": "Gold & News"
+  },
+  "plugins": [
+    {
+      "name": "gold-news",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Finance"
+    }
+  ]
+}
