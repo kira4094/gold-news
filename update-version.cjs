@@ -85,11 +85,10 @@ const data = { version: ver, build, full, sha: currentSha };
 fs.writeFileSync(VERSION_FILE, JSON.stringify(data, null, 2) + "\n");
 
 // 4. 同步 plugin.json / version.json（如果有）
-// gold-news 定制：.claude-plugin(full) / .codex-plugin(codexFull) / .trae-plugin(ver纯数字)
+// gold-news 定制：.claude-plugin(full) / .codex-plugin(codexFull)
 const syncPaths = [
   { path: path.join(ROOT, ".claude-plugin", "plugin.json"), pluginVersion: full },
   { path: path.join(ROOT, ".codex-plugin", "plugin.json"), pluginVersion: codexFull },
-  { path: path.join(ROOT, ".trae-plugin", "plugin.json"), pluginVersion: ver },
   { path: path.join(ROOT, "version.json"), pluginVersion: ver },
 ];
 for (const { path: p, pluginVersion } of syncPaths) {

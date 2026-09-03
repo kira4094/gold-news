@@ -22,21 +22,19 @@ gold-price/
 ├── 黄金数据追踪表.md                     ← 美国宏观数据追踪表
 └── user_macro_gold_interest.md           ← 宏观数据与策略演进
 
-> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**——生成时先向用户确认存储位置（见「月度归档与多端同步」）。
+> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**——统一输出到 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`（默认唯一路径，见「月度归档」）。追踪表留在 skill 仓库。
 ```
 
-### 记忆存储位置（月度记录候选位置）
+### 记忆存储位置（月度记录默认路径）
 
-> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**：生成时**先提问用户存储位置**，以下为候选，按用户选定写入。
+> 📁 月度记录（备忘录/会话记录）**不随 skill 存放**，统一输出到固定路径：
 
 | 位置 | 路径 | 用途 |
 |:-----|:-----|:-----|
-| **记忆目录** | `C:\Users\kiray\AppData\Roaming\reasonix\memory\global\gold-price-memary\` | 会话自动加载 |
-| **OneDrive** | `D:\WindowsOS\OneDrive\应用\claude-memory\Rule\gold-price\`（junction 同步） | 跨设备 |
-| **Tolaria** | `D:\Projects\TolariaData\gold\`（type: Gold） | 可视化浏览 |
-| **自定义路径** | 用户指定 | 其他位置 |
+| **月度记录** | `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\` | 默认唯一输出（备忘录 + 会话记录）|
+| **追踪表** | `skills/gold-price/黄金数据追踪表.md`（skill 仓库内） | 在插件内维护，不入月度记录目录 |
 
-**规则：** 每次月度归档生成 4 份月度记录（月更备忘录 ×2 + 会话记录 ×2）时，**先向用户提问存储位置**（默认选项：记忆目录 / OneDrive / Tolaria / 自定义），按用户选定写入；skill 仓库只放 skill 自身文件（SKILL.md/规则/追踪表/user_macro_gold_interest.md），**不接收月度记录**。Tolaria 用 `create_note`（type: Gold，路径 `gold/{文件名}.md`），写完 `refresh_vault`。
+**规则：** 每次月度归档生成月更备忘录 + 会话记录时，**直接写入 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`**，不再切换多位置。追踪表（skill 文件）留在插件仓库 `skills/gold-price/` 下，与月度记录分开。
 ### 关联外部文件（跨 skill 引用）
 - `../news-summary/news-summary-auto-time.md` — 新闻汇总自动时间判断规则
 - `../news-summary/us-media-monitoring.md` — 美国媒体光谱监测规则
@@ -235,16 +233,13 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
 **触发：** 每次美国宏观数据发布后（CPI / PPI / PCE / 非农 / ADP / 初请 / ISM / GDP / 消费者信心 / 克利夫兰 Nowcast），**当天立即更新**《黄金数据追踪表》，不等月末。
 
 **步骤：**
-1. **更新追踪表** — 在 `黄金数据追踪表.md` 对应指标行填入实际值/预期/前值/结果判定，并记录市场反应（金价/美元/加息概率变动）
-2. **同步 3 处**（追踪表属 skill 文件，与月度记录分开处理）：
-   - skill 仓库：写文件 + `git add/commit/push`（commit 带 `fix:` 或 `feat:` 标签）
-   - 记忆目录：`cp` 复制
-   - Tolaria：`update_note`（带 `expectedMtime`）更新 `gold/黄金数据追踪表.md`
+1. **更新追踪表** — 在 `黄金数据追踪表.md`（skill 仓库 `skills/gold-price/` 内）对应指标行填入实际值/预期/前值/结果判定，并记录市场反应（金价/美元/加息概率变动）
+2. **提交**（追踪表属 skill 文件，留在插件仓库，与月度记录分开）：写文件 + `git add/commit/push`（commit 带 `fix:` 或 `feat:` 标签），新提交后跑 `update-version.cjs` 算版本
 3. **汇报** — 给用户展示数据速记（实际 vs 预期 vs 前值 + 市场反应 + 对黄金含义）
 
-**示例（8/7 非农）：** 发布 -2.3万 → 当天更新追踪表 7月行 + 非农明细 + 市场反应 → git push → 记忆目录 → Tolaria
+**示例（8/7 非农）：** 发布 -2.3万 → 当天更新追踪表 7月行 + 非农明细 + 市场反应 → git commit/push → update-version
 
-## 📁 月度归档与多端同步（月末必做）
+## 📁 月度归档（月末必做）
 
 **触发：** 每月最后一天 / 用户说"写月度记录" / 下月 1 号初始化新月份档案
 
@@ -255,20 +250,10 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
    - `黄金数据追踪表.md`（宏观数据全年累计，已含当月所有即时更新）
    > 月度记录（备忘录 ×2 + 会话记录 ×2）与追踪表分开处理：追踪表属 skill 文件留 skill 仓库；月度记录**不写回 skill 仓库**。
 
-2. **提问存储位置** — 生成 4 份月度记录前，先问用户「本次记录存哪里？」（默认：记忆目录 / OneDrive / Tolaria / 自定义路径），按用户选定写入（不写回 skill 仓库）：
-   | 位置 | 方式 |
-   |:-----|:-----|
-   | 记忆目录 `...\reasonix\memory\global\gold-price-memary\` | `cp` 复制（与 OneDrive junction 自动同步） |
-   | OneDrive `D:\WindowsOS\OneDrive\应用\claude-memory\Rule\gold-price\` | junction 自动同步（无需手动） |
-   | **Tolaria** `D:\Projects\TolariaData\gold\` | `create_note`（type: Gold，路径 `gold/{文件名}.md`）+ `refresh_vault` |
-   | 自定义路径 | 按用户指定路径写入 |
+2. **写入固定路径** — 生成月更备忘录 + 会话记录后，**直接写入 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`**（不写回 skill 仓库，不切多位置）：
+   - 文件名沿用现有惯例：`{月份}黄金分析与持仓备忘录.md`、`{月份}黄金分析会话记录.md`
 
-3. **版本号** — 更新 SKILL.md frontmatter 版本（feat 类改动 minor+1），仓库级版本跑 `update-version.cjs`
-
-4. **Tolaria 注意事项**：
-   - type 用 `Gold`（已注册），frontmatter 写 `type: Gold`
-   - 更新已有笔记用 `update_note`（带 `expectedMtime` 防覆盖）；新建用 `create_note`
-   - 完成后 `refresh_vault` 让 Tolaria 索引刷新
+3. **版本号** — 更新 SKILL.md frontmatter 版本（feat 类改动 minor+1），仓库级版本跑 `update-version.cjs`（同步三 manifest + 两 skill frontmatter）
 
 ## 🛟 失败模式与 Fallback
 
