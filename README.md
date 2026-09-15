@@ -33,7 +33,7 @@ gold-news/
 ## 版本号
 - 仓库级 `version.json` 由 `update-version.cjs` 计算（break→∞ / feat→minor / fix→patch）
 - `.claude-plugin/plugin.json` 的 version 由 update-version 同步
-- 插件版本统一由 `version.json` 与两个 plugin manifest 维护；Skill frontmatter 不写非标准版本字段
+- 插件版本统一由 `version.json`、两个 plugin manifest 与三个 Skill frontmatter 维护
 
 ## 说明
 - 月度记录、记忆等不随 plugin 存放；本地默认写入 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`，云端更新同名持久文件

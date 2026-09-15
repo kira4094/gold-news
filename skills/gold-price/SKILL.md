@@ -1,5 +1,6 @@
 ---
 name: gold-price
+version: "0.2.0"
 description: >
   黄金分析与金价获取 skill。整合金价获取（GoldPrice.Today / 东方财富 / PAXG 暗金）、
   宏观数据追踪（CPI/PCE/NFP/FRED 初请失业金）、持仓管理、Fed 传声筒信号链分析、

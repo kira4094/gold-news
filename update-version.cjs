@@ -112,5 +112,22 @@ for (const { path: p, pluginVersion } of syncPaths) {
   } catch { /* file not found or invalid JSON — skip silently */ }
 }
 
+// 4b. 同步三个 Skill frontmatter 的版本号。
+const skillFiles = [
+  path.join(ROOT, "skills", "gold-price", "SKILL.md"),
+  path.join(ROOT, "skills", "news-summary", "SKILL.md"),
+  path.join(ROOT, "skills", "gold-journal", "SKILL.md"),
+];
+for (const p of skillFiles) {
+  try {
+    const raw = fs.readFileSync(p, "utf8");
+    const updated = raw.replace(/(\nversion:\s*).*/g, `$1"${ver}"`);
+    if (updated !== raw) {
+      fs.writeFileSync(p, updated, "utf8");
+      console.log(`[sync] ${path.relative(ROOT, p)} → version: "${ver}"`);
+    }
+  } catch { /* skip silently */ }
+}
+
 console.log(`[version] ${full}`);
 console.log(`[codex-version] ${codexFull}`);
