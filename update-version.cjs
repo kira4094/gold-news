@@ -112,23 +112,5 @@ for (const { path: p, pluginVersion } of syncPaths) {
   } catch { /* file not found or invalid JSON — skip silently */ }
 }
 
-// 4b. 同步 skills 内 SKILL.md 的 frontmatter version（gold-news 定制：统一 follow 仓库 ver）
-const skillFiles = [
-  path.join(ROOT, "skills", "gold-price", "SKILL.md"),
-  path.join(ROOT, "skills", "news-summary", "SKILL.md"),
-];
-for (const p of skillFiles) {
-  try {
-    const raw = fs.readFileSync(p, "utf8");
-    // 只改 frontmatter 块（--- 开头到 --- 之间）的 version 行
-    // 匹配 frontmatter 的 version 行（到行尾整段），整体替换为 version: "ver"
-    const updated = raw.replace(/(\nversion:\s*).*/g, `$1"${ver}"`);
-    if (updated !== raw) {
-      fs.writeFileSync(p, updated, "utf8");
-      console.log(`[sync] ${path.relative(ROOT, p)} → version: "${ver}"`);
-    }
-  } catch { /* skip silently */ }
-}
-
 console.log(`[version] ${full}`);
 console.log(`[codex-version] ${codexFull}`);

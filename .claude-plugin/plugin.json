@@ -1,7 +1,7 @@
 {
   "name": "gold-news",
-  "version": "v0.1.4(20260907.2304)",
-  "description": "黄金 + 新闻一体化：gold-price (黄金分析与金价获取) + news-summary (新闻汇总与分类)，新闻汇总强制二合一伴随黄金日报。含金价双源交叉、Fed传声筒信号链、褐皮书追踪、六维度强制清单、固化输出模板。",
+  "version": "v0.1.4(20260915.2046)",
+  "description": "黄金 + 新闻 + 会话归档一体化：gold-price、news-summary、gold-journal。新闻汇总强制伴随黄金日报，完整输出后把黄金讨论写入月度Markdown草稿，月底生成会话记录与持仓备忘录。",
   "author": {
     "name": "kira4094"
   },
@@ -12,6 +12,8 @@
     "gold-analysis",
     "news",
     "news-summary",
+    "gold-journal",
+    "monthly-journal",
     "fed",
     "beige-book",
     "finance"

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Gold Journal"
+  short_description: "把黄金讨论持续写入月度草稿，并在月底生成正式会话记录与持仓备忘录"
+  default_prompt: "使用 $gold-journal 把本轮黄金讨论写入当月 Markdown 草稿。"
+
+policy:
+  allow_implicit_invocation: true

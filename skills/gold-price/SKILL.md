@@ -6,7 +6,6 @@ description: >
   美国媒体监测。支持日常金价查询、周末暗金参考、黄金日报生成。
   中：黄金价格 | 金价 | 黄金分析 | 黄金日报 | XAU | PAXG | 金价多少 | 宏观数据 | 非农 | CPI | Fed | 黄金持仓
   EN：gold price | gold analysis | gold daily | XAU | PAXG | gold rate | gold price today | macro data | NFP
-version: "0.1.4"
 ---
 
 # Gold-Price Skill — 黄金分析与金价获取
@@ -38,6 +37,7 @@ gold-price/
 ### 关联外部文件（跨 skill 引用）
 - `../news-summary/news-summary-auto-time.md` — 新闻汇总自动时间判断规则
 - `../news-summary/us-media-monitoring.md` — 美国媒体光谱监测规则
+- `../gold-journal/SKILL.md` — 黄金讨论逐轮文字归档与月末成稿
 
 ### TL;DR — 速查
 
@@ -46,6 +46,7 @@ gold-price/
 | 查金价 | 直接提问 → 自动判断交易时段选择数据源 |
 | **新闻汇总** | 🔴 **必做：新闻汇总 + 黄金日报二合一输出**（见"新闻汇总联动"） |
 | 看黄金日报 | 查完金价后，🔴 CHECKPOINT 选"是"；**且每次新闻汇总也必做** |
+| 记录本轮讨论 | 主要回答完成后由 `gold-journal` 追加到当月 Markdown 草稿 |
 | 遇到报错 | 看 🛟 失败模式表，按触发条件找修复 |
 | 看持仓盈亏 | 查金价后自动计算，回本线 ~$4,715 |
 
@@ -239,21 +240,15 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
 
 **示例（8/7 非农）：** 发布 -2.3万 → 当天更新追踪表 7月行 + 非农明细 + 市场反应 → git commit/push → update-version
 
-## 📁 月度归档（月末必做）
+## 📁 会话草稿与月度归档（由 gold-journal 执行）
 
-**触发：** 每月最后一天 / 用户说"写月度记录" / 下月 1 号初始化新月份档案
-
-**步骤：**
-1. **写档案** — 生成/更新 5 个文件：
-   - `{月份}黄金分析与持仓备忘录.md`（持仓+日历+框架）
-   - `{月份}黄金分析会话记录.md`（会话要点+数据速览）
-   - `黄金数据追踪表.md`（宏观数据全年累计，已含当月所有即时更新）
-   > 月度记录（备忘录 ×2 + 会话记录 ×2）与追踪表分开处理：追踪表属 skill 文件留 skill 仓库；月度记录**不写回 skill 仓库**。
-
-2. **写入固定路径** — 生成月更备忘录 + 会话记录后，**直接写入 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`**（不写回 skill 仓库，不切多位置）：
-   - 文件名沿用现有惯例：`{月份}黄金分析与持仓备忘录.md`、`{月份}黄金分析会话记录.md`
-
-3. **版本号** — 更新 SKILL.md frontmatter 版本（feat 类改动 minor+1），仓库级版本跑 `update-version.cjs`（同步三 manifest + 两 skill frontmatter）
+- 本技能完成金价、宏观或持仓分析后，按 `../gold-journal/SKILL.md` 把本轮实质内容写入当月 Markdown 草稿。
+- 每月最后一天、用户要求月报或下月首次归档时，由 `gold-journal` 遍历整月草稿并生成：
+  - `{月份}黄金分析会话记录.md`
+  - `{月份}黄金分析与持仓备忘录.md`
+- 本地默认写入 `D:\WindowsOS\OneDrive\应用\文档\gold-price-memary\`；云端更新同名持久文件。月度记录不写回插件仓库。
+- `黄金数据追踪表.md` 仍由本技能在数据发布后即时更新并保留在仓库，不能被月度草稿替代。
+- 归档是回答后的独立步骤，不得降低金价双源、宏观核验、持仓计算或新闻汇总质量。
 
 ## 🛟 失败模式与 Fallback
 

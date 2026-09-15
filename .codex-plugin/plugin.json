@@ -1,7 +1,7 @@
 {
   "name": "gold-news",
-  "version": "0.1.4+20260907.2304",
-  "description": "黄金 + 新闻一体化：gold-price (黄金分析与金价获取) + news-summary (新闻汇总与分类)。新闻汇总必伴随黄金日报二合一，含金价双源交叉、Fed传声筒、褐皮书追踪、六维度清单、固化输出模板。",
+  "version": "0.1.4+20260915.2046",
+  "description": "黄金 + 新闻 + 会话归档一体化：gold-price、news-summary、gold-journal。新闻汇总必伴随黄金日报，并在完整输出后把黄金讨论写入月度 Markdown 草稿。",
   "author": {
     "name": "kira4094",
     "url": "https://github.com/kira4094"
@@ -14,6 +14,8 @@
     "gold-analysis",
     "news",
     "news-summary",
+    "gold-journal",
+    "monthly-journal",
     "fed",
     "beige-book",
     "xau"
@@ -21,19 +23,20 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Gold & News",
-    "shortDescription": "黄金分析 + 新闻汇总 + 金价获取",
-    "longDescription": "整合黄金价格获取（双源交叉）、宏观数据追踪（CPI/PCE/NFP/Fed/褐皮书）、持仓管理、Fed传声筒信号链与新闻汇总。新闻汇总自动伴随黄金日报二合一输出。",
+    "shortDescription": "黄金分析 + 新闻汇总 + 月度会话归档",
+    "longDescription": "整合黄金价格获取（双源交叉）、宏观数据追踪、持仓管理、Fed传声筒与新闻汇总；完整回答后自动把黄金讨论写入月度Markdown草稿，并在月底生成会话记录和持仓备忘录。",
     "developerName": "kira4094",
     "category": "Finance",
     "capabilities": [
       "Interactive",
-      "Read"
+      "Read",
+      "Write"
     ],
     "websiteURL": "https://github.com/kira4094/gold-news",
     "defaultPrompt": [
       "新闻汇总",
       "黄金日报 / 金价多少",
-      "追踪 Fed / 褐皮书 / 宏观数据"
+      "补录黄金讨论 / 生成月度会话记录与备忘录"
     ],
     "brandColor": "#D4AF37"
   }
