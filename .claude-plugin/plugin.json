@@ -1,6 +1,6 @@
 {
   "name": "gold-news",
-  "version": "v0.2.0(20260915.2214)",
+  "version": "v0.2.1(20260915.2219)",
   "description": "黄金 + 新闻 + 会话归档一体化：gold-price、news-summary、gold-journal。新闻汇总强制伴随黄金日报，完整输出后把黄金讨论写入月度Markdown草稿，月底生成会话记录与持仓备忘录。",
   "author": {
     "name": "kira4094"
