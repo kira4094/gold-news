@@ -33,7 +33,7 @@
 ## 📊 当前金价
 | 项目 | 数据 |
 |:-----|:-----|
-| **XAU/USD** | **${price}**（gold-api / goldprice.today 双源交叉✅，偏差<0.5%）|
+| **XAU/USD** | **${price}**（东方财富主报价 + ${verification_source}交叉，偏差${price_gap}）|
 | **人民币/克** | **¥{price_cny}** |
 | **日内区间** | ${low} – ${high} |
 | **数据时间** | {来源时间} |
@@ -200,6 +200,5 @@
 
 ```
 💛 **即时金价**：${price} / ¥{price_cny}（{时间}）
-- 日内：${low}–${high} | 来源：gold-api + goldprice.today 双源✅
+- 日内：${low}–${high} | 来源：东方财富 + ${verification_source} 双源${verification_status}
 ```
-

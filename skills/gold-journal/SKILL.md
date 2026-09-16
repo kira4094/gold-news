@@ -1,6 +1,6 @@
 ---
 name: gold-journal
-version: "0.2.1"
+version: "0.3.0"
 description: >
   黄金会话文字归档与月末整理技能。只要发生黄金、金价、贵金属、Fed、美国宏观、
   美债、财政部回购、能源地缘、AI宏观传导、黄金持仓或 Gold & News 工作流讨论，

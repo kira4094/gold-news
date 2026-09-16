@@ -1,6 +1,6 @@
 ---
 name: news-summary
-version: "0.2.1"
+version: "0.3.0"
 description: >
   新闻汇总与分类技能。当用户要求汇总新闻、整理今日新闻、做新闻日报/早报/晚报、
   搜索最新资讯、查看今天发生了什么新闻时触发。自动通过网络搜索最新新闻，
@@ -156,10 +156,11 @@ description: >
 → 执行新闻多维度搜索（下方 C0.1 强制清单）
 → 若命中 黄金/经济/地缘/美债 任一维度
 → 必须调用 gold-price skill 的日报模板
+→ 必须先执行 gold-price/eastmoney-cloud-market-data.md 的四项行情快照
 → 输出 = 新闻汇总 + 黄金日报（二合一）
 ```
 
-**黄金日报模板：完整骨架见 `../gold-price/output-templates.md`**（gold-price × news-summary 共用）。4 项必备：① 当前金价 ② 持仓快照 ③ 本周关键数据 ④ 外网重磅，含**数据失效护栏**——拉不到数据须明说不报、禁估算填充，详见 gold-price/SKILL.md「新闻汇总联动」节与 `output-templates.md` 第一节。**本文件不再重复维护模板细节，防止两处漂移。**
+**黄金日报模板：完整骨架见 `../gold-price/output-templates.md`**（gold-price × news-summary 共用）。生成前必须读取并执行 `../gold-price/eastmoney-cloud-market-data.md`，取得XAU、美国10Y、布伦特、美元指数快照。4 项必备：① 当前金价 ② 持仓快照 ③ 本周关键数据 ④ 外网重磅，含**数据失效护栏**——拉不到数据须明说不报、禁估算填充，详见 gold-price/SKILL.md「新闻汇总联动」节与 `output-templates.md` 第一节。**本文件不再重复维护模板细节，防止两处漂移。**
 
 > ⚠️ **若用户只说"新闻汇总"，黄金日报仍必须生成**——不要等用户单独说"黄金日报"。
 

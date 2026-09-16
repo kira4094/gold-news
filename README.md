@@ -7,9 +7,10 @@
 gold-news/
 ├── .claude-plugin/plugin.json   ← manifest (skills: ./skills)
 ├── skills/
-│   ├── gold-price/              ← 黄金分析与金价获取（5文件）
+│   ├── gold-price/              ← 黄金分析与金价获取（6文件）
 │   │   ├── SKILL.md
 │   │   ├── XAU-Gold-price-acquisition-rules.md
+│   │   ├── eastmoney-cloud-market-data.md
 │   │   ├── output-templates.md  （gold-price × news-summary 共用模板）
 │   │   ├── user_macro_gold_interest.md
 │   │   └── 黄金数据追踪表.md      （含褐皮书6.6追踪节）

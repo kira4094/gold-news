@@ -7,11 +7,11 @@
 ### 步骤（每次报金价必走）
 
 ```
-1. 源A：gold-api.com/price/XAU 拉一次
-2. 源B：goldprice.today/api.php?data=live（Node 精确取 USD.ounce）
+1. 主源A：东方财富兼容页 122.XAU（按 eastmoney-cloud-market-data.md）
+2. 验证源B：goldprice.today/api.php?data=live 或 gold-api.com/price/XAU
 3. 对比两值：
    ├─ 相差 ≤0.5% → 采信（输出标"双源确认"）
-   ├─ 相差 >0.5% → 拉第三源（东方财富 browse CLI）裁决
+   ├─ 相差 >0.5% → 拉尚未使用的第三源裁决
    └─ 相差 >1%   → 标红"⚠️ 价格异常，两源偏差>1%，待重核"，不直接采信
 4. 与上次报的价值对比：
    ├─ 偏离 ≤1% → 正常
@@ -30,7 +30,7 @@
 
 ## 价格基准约定
 
-**以 GoldPrice.Today + 东方财富共同为基准。** 日常看价优先用 GoldPrice.Today API（免key、全货币、JSON输出），OHLC数据需要时用东方财富（browse CLI）。两套数据交叉验证。
+**交易时段以东方财富兼容行情页为主报价，GoldPrice.Today / gold-api作为交叉验证。** 人民币/克优先取GoldPrice.Today的`CNY.gram`或按实时汇率换算；OHLC与用户屏幕口径使用东方财富。云端四项行情路径与等待规则见`eastmoney-cloud-market-data.md`。
 
 ---
 
@@ -69,9 +69,9 @@ export CHROME_PATH="C:\Users\kiray\AppData\Local\Chromium\Application\chrome.exe
 
 ---
 
-## 方法1：GoldPrice.Today API ⭐ 主力推荐
+## 方法1：GoldPrice.Today API（人民币换算与辅助验证）
 
-**日常看价首选。** 免API Key、返回全货币金价、5分钟更新。通过 `ctx_execute` 获取。
+免API Key、返回全货币金价、5分钟更新。用于东方财富XAU的第二源验证，并直接提供人民币/克。通过 `ctx_execute` 获取。
 
 ### 接口地址
 ```
@@ -124,12 +124,13 @@ function fetch(url) {
 
 ---
 
-## 方法2：东方财富浏览（OHLC 数据专用）
+## 方法2：东方财富浏览（云端主报价 + 四项行情）
 
-**需要完整OHLC（开/高/低/收）时使用。** 日常看现货价优先用方法1。
+**交易时段主方案。** 云端严格执行`eastmoney-cloud-market-data.md`；本地可继续使用browse CLI。
 
 ### 页面地址
-- https://quote.eastmoney.com/q/122.XAU.html — XAU/USD 现货（完整 OHLC）
+- https://quote.eastmoney.com/option/122.XAU.html?jump_to_web=true — 云端XAU/USD兼容行情页
+- https://quote.eastmoney.com/q/122.XAU.html — 本地可尝试的原详情页；云端不作为主入口
 - https://quote.eastmoney.com/globalfuture/GC00Y.html — COMEX 黄金期货
 
 ### 操作命令
@@ -138,8 +139,8 @@ function fetch(url) {
 # 设置 Chromium 路径（必选）
 export CHROME_PATH="C:\Users\kiray\AppData\Local\Chromium\Application\chrome.exe"
 
-# 打开东方财富 XAU 页面
-browse open "https://quote.eastmoney.com/q/122.XAU.html" --local
+# 打开东方财富 XAU 兼容页
+browse open "https://quote.eastmoney.com/option/122.XAU.html?jump_to_web=true" --local
 
 # 获取页面完整文本内容，提取价格数据
 browse get text "body"
@@ -158,6 +159,7 @@ browse stop
 - 最新价、今开、最高、最低、昨收、涨跌、涨跌幅、买入价、卖出价、振幅
 
 ### ⚠️ 注意事项
+- 云端必须等待`.zxj`出现数字：每500毫秒检查，最长15秒，只允许刷新一次
 - 需要先设置 `export CHROME_PATH` 指向 Chromium 可执行文件路径
 - 页面价格由 JavaScript 动态渲染，browse 可以正常执行 JS
 - 如果已经有旧的 session 在运行，先 `browse stop` 再重新打开
@@ -323,7 +325,7 @@ site:eastmoney.com 现货黄金 最新价
 
 ## 数据对齐确认
 
-每次获取金价后，以 **GoldPrice.Today 的 CNY.gram** 与用户平台报价（东方财富/银行积存金页面）核对。若偏差超过 5元/g，再用东方财富（方法2）确认。
+每次获取金价后，以**东方财富XAU/USD**为用户屏幕主口径，并用GoldPrice.Today或gold-api核对美元报价；人民币/克优先用GoldPrice.Today的`CNY.gram`。与银行积存金不是同一口径，比较时必须说明点差/手续费影响。
 
 ---
 
@@ -339,13 +341,13 @@ site:eastmoney.com 现货黄金 最新价
 ```
 
 ### 获取流程
-1. **黄金日报主数据** → **GoldPrice.Today API（方法1）**，一次性获取XAU/USD + XAU/CNY
-2. **暗金价格** → **PAXG（方法2B）**，Kraken/MetaMask 7×24真实交易，周末首选
-3. **暗金备用** → 拉不到时依次尝试：GoldPrice.Today → gold-api.com
-4. **需要OHLC数据** → 东方财富（方法2），browse CLI
+1. **黄金日报主数据** → **东方财富兼容页（方法2）**取得XAU/USD与OHLC，同时执行四项行情快照
+2. **人民币/克 + 第二源** → GoldPrice.Today（方法1）；失败时用gold-api或实时汇率换算
+3. **暗金价格** → **PAXG（方法2B）**，Kraken/MetaMask 7×24真实交易，周末首选
+4. **暗金备用** → 拉不到时依次尝试：GoldPrice.Today → gold-api.com
 5. **快速核对现价** → Kitco（方法3）或 gold-api.com（方法4）
-6. **以上全不可用时** → 搜索兜底（方法5）
-7. **数据偏差核对** → 官方金价与暗金交叉验证，异常偏差>2%时留意
+6. **以上全不可用时** → 搜索兜底（方法5），必须标注非实时
+7. **数据偏差核对** → XAU主源与验证源偏差>0.5%时引入第三源，>1%标异常
 
 ---
 
