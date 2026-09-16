@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "targets": [
+    {
+      "path": ".claude-plugin/plugin.json",
+      "kind": "json-field",
+      "field": "version",
+      "value": "full"
+    },
+    {
+      "path": ".codex-plugin/plugin.json",
+      "kind": "json-field",
+      "field": "version",
+      "template": "${version}+${build}"
+    },
+    {
+      "path": "skills/gold-journal/SKILL.md",
+      "kind": "markdown-frontmatter",
+      "field": "version",
+      "value": "version"
+    },
+    {
+      "path": "skills/gold-price/SKILL.md",
+      "kind": "markdown-frontmatter",
+      "field": "version",
+      "value": "version"
+    },
+    {
+      "path": "skills/news-summary/SKILL.md",
+      "kind": "markdown-frontmatter",
+      "field": "version",
+      "value": "version"
+    },
+    {
+      "path": "version.json",
+      "kind": "metadata"
+    }
+  ]
+}
