@@ -2,7 +2,7 @@
 name: gold-price
 version: "0.3.0"
 description: >
-  黄金分析与金价获取 skill。整合东方财富实时行情快照（XAU / 美国10Y / 布伦特 / 美元指数）、
+  黄金分析与金价获取 skill。整合 Trading Economics HTML 行情快照（XAU / 美国10Y / 布伦特 / 美元指数）、
   GoldPrice.Today / gold-api 交叉验证、PAXG 暗金、
   宏观数据追踪（CPI/PCE/NFP/FRED 初请失业金）、持仓管理、Fed 传声筒信号链分析、
   美国媒体监测。支持日常金价查询、周末暗金参考、黄金日报生成。
@@ -20,7 +20,8 @@ description: >
 gold-price/
 ├── SKILL.md                              ← 技能入口（本文件）
 ├── XAU-Gold-price-acquisition-rules.md   ← 金价获取规则（主规则）
-├── eastmoney-cloud-market-data.md        ← 云端东方财富四项行情取数规则
+├── tradingeconomics-market-data.md       ← 默认四项行情取数规则
+├── eastmoney-cloud-market-data.md        ← 仅显式要求东方财富时使用的备用规则
 ├── 黄金数据追踪表.md                     ← 美国宏观数据追踪表
 └── user_macro_gold_interest.md           ← 宏观数据与策略演进
 
@@ -47,7 +48,7 @@ gold-price/
 | 你想做什么 | 从这里开始 |
 |:----------|:-----------|
 | 查金价 | 直接提问 → 自动判断交易时段选择数据源 |
-| 看当前市场联动 | 🔴 先执行东方财富四项行情快照，再分析黄金/10Y/原油/美元 |
+| 看当前市场联动 | 🔴 先执行 Trading Economics 四项行情快照，再分析黄金/10Y/原油/美元 |
 | **新闻汇总** | 🔴 **必做：新闻汇总 + 黄金日报二合一输出**（见"新闻汇总联动"） |
 | 看黄金日报 | 查完金价后，🔴 CHECKPOINT 选"是"；**且每次新闻汇总也必做** |
 | 记录本轮讨论 | 主要回答完成后由 `gold-journal` 追加到当月 Markdown 草稿 |
@@ -80,7 +81,7 @@ gold-price/
 
 ## 能力
 
-- **🏆 金价获取** — 东方财富云端实时行情 / GoldPrice.Today 与 gold-api 交叉 / PAXG 暗金
+- **🏆 金价获取** — Trading Economics 默认行情 / GoldPrice.Today 与 gold-api 交叉 / PAXG 暗金
 - **🧭 四项联动快照** — XAU/USD、美国10Y、布伦特、美元指数统一取数
 - **📊 宏观数据追踪** — CPI/PCE/NFP/初请失业金/消费者信心/GDP
 - **🔄 Cleveland Fed Nowcast** — Playwright 自动打开页面 → 展开三个标签（Quarterly / Monthly MoM / YoY）→ 分别点击 Download CSV → 读取后删除CSV → 关闭浏览器
@@ -212,11 +213,13 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
 
 ### A1: 数据获取
 
+**东方财富触发边界：** 默认行情入口始终读取 `tradingeconomics-market-data.md`。只有用户明确说“东方财富报价”“东方财富页面”或“用东方财富核对”时，才读取 `eastmoney-cloud-market-data.md`；用户说“不用东方财富”、未提及东方财富或 Trading Economics 请求失败，都不构成启用条件。
+
 0. **联网核实北京时间（🔴 每次必做）：** 通过联网时间服务或可联网的时间工具获取 `Asia/Shanghai`（UTC+8）当前日期、星期和时刻，据此判断交易日与交易时段。禁止以 `Get-Date`、系统时钟、会话日期、模型记忆或用户说法代替联网取时。若来源只返回 UTC，按 UTC+8 换算并保留原始 UTC 时间与来源供核对。输出必须标注 `截至北京时间 YYYY-MM-DD HH:mm`。联网取时失败时，明确输出 `⚠️ 无法联网获取北京时间，本次金价/日报暂停`，不得继续提供带“当前/今日/实时”标签的金价或日报。
 1. **判断是否需要当前市场数据：** 金价、黄金日报、新闻汇总、当前走势、异动原因、FOMC/数据公布后的市场反应，均视为需要。
-2. **强制四项快照（交易时段）：** 读取 `eastmoney-cloud-market-data.md`，先取得 XAU/USD、美国10Y、布伦特和美元指数；不得跳过后直接用记忆值分析。
-3. **黄金双源验证：** 东方财富XAU为主报价，再按 `XAU-Gold-price-acquisition-rules.md` 用 GoldPrice.Today 或 gold-api 交叉；偏差超过0.5%时引入第三源。
-4. **非交易时段：** 周末或主要市场休市时改用 PAXG 暗金；东方财富最近收盘只能标为收盘参考，不能标成实时价。
+2. **强制四项快照（交易时段）：** 读取 `tradingeconomics-market-data.md`，先取得 XAU/USD、美国10Y、布伦特和美元指数；不得跳过后直接用记忆值分析。
+3. **黄金双源验证：** Trading Economics XAU为主报价，再按 `XAU-Gold-price-acquisition-rules.md` 用 GoldPrice.Today 或 gold-api 交叉；偏差超过0.5%时引入第三源。
+4. **非交易时段：** 周末或主要市场休市时改用 PAXG 暗金；Trading Economics最近收盘只能标为收盘参考，不能标成实时价。
 5. **输出：** 保留各源原始时间、联网取得的北京时间和抓取状态；缺项必须标记，不得估算填充。
 
 ### A2: 扩展分析
@@ -261,12 +264,13 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
 
 | 触发条件 | 一线修复 | 仍失败兜底 |
 |:---------|:---------|:-----------|
+| Trading Economics HTML 请求失败 | 每页15秒最多重试1次，页面间失败隔离 | 标记缺项；仅用户明确要求东方财富时切旧规则 |
 | GoldPrice.Today API 超时 / 空返回 | 等 3 秒重试 1 次 | 切 gold-api.com（方法4）或 Kitco（方法3） |
 | `browse open` 报端口冲突 | 先 `browse stop` 再重开 | 加 `--session custom` 用独立 session |
 | browse 找不到 Chromium | 确认 `CHROME_PATH` 环境变量 | 浏览器不可用时降级到方法5（搜索兜底） |
 | 周末 PAXG 暗金也拉不到 | 切备用：GoldPrice.Today → gold-api.com | 标注"无法获取暗金价格"，告知用户 |
 | XAU主源与验证源偏差 > 0.5% | 使用尚未参与比较的第三源裁决 | 偏差 > 1% 时标异常并保留全部来源 |
-| 东方财富原详情页主报价为`-` | 按 `eastmoney-cloud-market-data.md` 切兼容页/行情列表 | 最多冷启动15秒并只刷新一次；仍失败则标缺项 |
+| 东方财富原详情页主报价为`-` | 仅用户明确要求东方财富时按 `eastmoney-cloud-market-data.md` 切兼容页/行情列表 | 最多冷启动15秒并只刷新一次；仍失败则标缺项 |
 | 美元指数行缺少独立时间戳 | 保留抓取北京时间并标注“无源端时间” | 分钟级因果分析前用第二实时源核验 |
 | FRED API 初请失业金拉不到 | 5 分钟后重试 | 降级到 WebSearch 搜索快照 |
 | Cleveland Fed Nowcast JS 渲染获取不到 | 切换到 Playwright 打开页面 + Download CSV | Playwright 不可用时，可以尝试 `web_fetch` 直接获取页面文字内容（可能截断但能看重要数字） |
@@ -278,9 +282,9 @@ Playwright MCP 可以绕过 JS 渲染限制，直接获取克利夫兰联储的�
 
 | # | ❌ 不要这样做 | 为什么 | ✅ 应该这样做 |
 |:-:|:-------------|:-------|:-------------|
-| 1 | **在云端继续读取东方财富XAU原详情页** | 原页可能长期显示`-`，即使页面已加载完成 | 云端按 `eastmoney-cloud-market-data.md` 使用兼容页和条件等待 |
-| 2 | **交易时段依赖 PAXG 暗金** | PAXG 是周末/非交易时段用的，交易时段有更准的官方来源 | 交易时段 → 东方财富方法2 + 方法1交叉；周末 → 方法2B |
-| 3 | **只看一个数据源就交付** | 单一来源可能有延迟或异常，无法交叉验证 | 至少两套来源核对，偏差 > 2% 时标注 |
+| 1 | **默认调用东方财富** | 其规则保留为显式备用，默认快照应走 Trading Economics | 读取 `tradingeconomics-market-data.md`；仅用户明确点名东方财富时调用旧规则 |
+| 2 | **交易时段依赖 PAXG 暗金** | PAXG 是周末/非交易时段用的，交易时段有更适合的网页行情来源 | 交易时段 → Trading Economics + 黄金第二源交叉；周末 → 方法2B |
+| 3 | **把单源快照当已核验金价交付** | 单一来源可能有延迟或异常，无法交叉验证 | 黄金至少两源核对；偏差 > 0.5% 引入第三源，> 1% 标异常；核验不足只交付待核快照 |
 | 4 | **日报里堆砌全部能力** | 用户要金价却给了完整分析框架，信息过载 | 按 🔴 CHECKPOINT 让用户选：金价 only / 标准日报 / 自定义 |
 | 5 | **忽略汇率直接用国际金价报人民币** | XAU/USD × 汇率 ÷ 31.1035 才是国内裸金 | 优先用 GoldPrice.Today 直接返回的 CNY.gram；手动换算时标注汇率 |
 | 6 | **FOMC 前不查 Timiraos** | 传声筒放风是 Fed 转向最早信号，错过了等于盲飞 | FOMC 前必须搜 Timiraos 最新文章，更新信号链 |
