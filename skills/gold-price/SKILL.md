@@ -1,6 +1,6 @@
 ---
 name: gold-price
-version: "0.3.0"
+version: "0.4.0"
 description: >
   黄金分析与金价获取 skill。整合 Trading Economics HTML 行情快照（XAU / 美国10Y / 布伦特 / 美元指数）、
   GoldPrice.Today / gold-api 交叉验证、PAXG 暗金、
